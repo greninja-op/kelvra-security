@@ -1,0 +1,32 @@
+# Catastrophic shell command denylist (POSIX-ERE & Windows patterns)
+# Sourced from davidondrej/skills ops-and-setup/global-agent-guardrails
+
+# Destructive file removal
+rm\s+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r)\s+(/|~|\$HOME|\.\.)(\s|$)
+rm\s+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r)\s+\*
+sudo\s+rm\s+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r)
+del\s+/[sS]\s+/[qQ]\s+[cC]:\\
+
+# Raw device writes & disk formatting
+mkfs(\.[a-z0-9]+)?\s+
+dd\s+if=.*of=/dev/
+format\s+[a-zA-Z]:(\s|$)
+
+# Remote shell execution / untrusted pipelining
+curl\s+.*\|\s*(ba)?sh(\s|$)
+wget\s+.*\|\s*(ba)?sh(\s|$)
+fetch\s+.*\|\s*(ba)?sh(\s|$)
+
+# Fork bombs & denial of service
+:\(\)\s*\{\s*:\s*\|\s*:\s*&\s*\}\s*;\s*:
+while\s+true;\s*do\s+.*&\s*done
+
+# Catastrophic git destruction
+git\s+push\s+.*--force
+git\s+push\s+.*-f(\s|$)
+git\s+push\s+.*:([a-zA-Z0-9_\-]+)
+git\s+branch\s+(-D|-d)\s+(main|master|prod|production)
+git\s+reset\s+--hard\s+HEAD~[0-9]{2,}
+
+# Overly permissive root permission tampering
+chmod\s+(-R\s+)?777\s+(/|~|\$HOME)(\s|$)
