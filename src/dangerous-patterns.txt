@@ -30,3 +30,19 @@ git\s+reset\s+--hard\s+HEAD~[0-9]{2,}
 
 # Overly permissive root permission tampering
 chmod\s+(-R\s+)?777\s+(/|~|\$HOME)(\s|$)
+
+# Credential store tampering & secret extraction
+security\s+dump-keychain
+vaultcmd(\.exe)?(\s|$)
+mimikatz(\.exe)?(\s|$)
+cat\s+.*\.env(\s*\||\s*>|\s*>>|\s+https?://)
+type\s+.*\.env(\s*\||\s*>|\s*>>|\s+https?://)
+(Get-Content|gc)\s+.*\.env(\s*\||\s*>|\s*>>|\s+https?://)
+
+# Remote exfiltration via webhooks
+curl\s+.*-(d|F|X\s*POST).*(webhook|requestbin|pastebin|ngrok|pipedream|hookdeck)
+(Invoke-WebRequest|iwr|Invoke-RestMethod|irm).*-(Method\s+Post|Body).*(webhook|requestbin|pastebin|ngrok|pipedream|hookdeck)
+
+# System and registry destruction
+reg\s+delete\s+HKLM
+bcdedit\s+/delete
