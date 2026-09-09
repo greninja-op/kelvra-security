@@ -15,6 +15,7 @@ from .confirmation_gate import confirmation_gate
 from .mcp_authorizer import mcp_authorizer
 from .rate_limiter import rate_limiter
 from .security_audit_logger import audit_logger
+from .report_status import get_report_status
 
 app = FastAPI(
     title="Kelvra Security Service",
@@ -120,6 +121,20 @@ class AnomalyCheckRequest(BaseModel):
 
 class AnomalyResetRequest(BaseModel):
     entity_id: str
+
+
+class ReportCadence(BaseModel):
+    automated: Optional[str] = None
+    manual: Optional[str] = None
+    next_manual_due: Optional[str] = None
+
+
+class ReportStatusResponse(BaseModel):
+    report: str
+    cadence: ReportCadence
+    last_audit: Optional[str] = None
+    freshness_rule: Optional[str] = None
+    notes: List[str] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -440,6 +455,15 @@ async def get_audit_logs(
         "limit": limit,
         "logs": logs,
     }
+
+
+# ---------------------------------------------------------------------------
+# 8. Security Report Freshness (§6 rule-security-report-freshness, read-only)
+# ---------------------------------------------------------------------------
+@app.get("/api/report/status", response_model=ReportStatusResponse)
+async def report_status() -> Dict[str, Any]:
+    """Live freshness of the repo's own security report (parsed at request time; null-honest)."""
+    return get_report_status()
 
 
 if __name__ == "__main__":
