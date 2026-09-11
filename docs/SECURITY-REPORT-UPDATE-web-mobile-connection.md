@@ -295,12 +295,27 @@ this shape — this section does, concretely.
   `paired_devices.json`** (plaintext on disk, linear-scan lookup, no expiry/rotation,
   `:122-135`). Fix: token-auth + ownership on all four; rotate on revoke; encrypt at rest.
 
-### 4.5 Trust model — OPEN DECISION (do not build on an assumption)
-- **Undecided:** same-LAN-only vs remote (relay/tunnel) reachability for Mobile→Bench. This
-  determines whether public-internet assumptions (public-CA TLS + the 2026 pinning debate) apply,
-  or whether paired-device mutual TLS / pairing-established PSK fits better. **The report records
-  no answer.** Once decided, document it here with rationale; implementation follows the decision,
-  never precedes it.
+### 4.5 Trust model — DECIDED: relay-first (owner decision 2026-09-11)
+
+- **Decision: RELAY.** Mobile must work across different networks/locations;
+  LAN-only is not acceptable as the primary architecture. Phone → secure
+  relay/tunnel → host. LAN/direct may exist as an optimization, never the
+  only path.
+- **Relay = transport, NOT authority.** It must never decide identity,
+  authorization, destructive actions, permissions, workspace state, memory,
+  execution, or security. The host stays the source of truth for all of
+  those; the mobile client stays a remote human interface, never the brain.
+- **Authenticated legs:** Mobile↔Relay and Relay↔Host both authenticated;
+  mutual auth (certificate/public-key identity + app-level
+  authenticated/encrypted messages) where practical. The relay must not be
+  able to impersonate host or client.
+- **Client-identity primitive (exists today):** the P-256 device key from
+  mobile P2-14 (Keystore/SEP, nonce proof-of-possession) is the identity
+  anchor future mutual auth builds on — no new identity system.
+- **Code status:** no LAN-only enforcement exists in the mobile client
+  (connection target is the opaque QR `host_ws_url`; a relay `wss://` URL
+  works unchanged). No relay server is built here — that is transport
+  infrastructure with its own spec, not part of this decision record.
 
 ### 4.6 TLS floor + pinning rule (applies once transport is TLS)
 - **Minimum:** TLS 1.3 where the platform supports it, TLS 1.2 floor — pinned in config, never
